@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jmg.AspNetCore.TypedRouting", "Jmg.AspNetCore.TypedRouting\Jmg.AspNetCore.TypedRouting.csproj", "{C5B97436-6A32-4B9C-A9A2-4BE53B950D0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jmg.AspNetCore.TypedRouting.Tests", "Jmg.AspNetCore.TypedRouting.Tests\Jmg.AspNetCore.TypedRouting.Tests.csproj", "{0550BD6E-5DB3-4740-8467-38664CB1E5B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jmg.AspNetCore.TypedRouting.WebTest", "Jmg.AspNetCore.TypedRouting.WebTest\Jmg.AspNetCore.TypedRouting.WebTest.csproj", "{A0B89616-F074-4BD3-A3A7-3833B6735034}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C5B97436-6A32-4B9C-A9A2-4BE53B950D0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5B97436-6A32-4B9C-A9A2-4BE53B950D0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5B97436-6A32-4B9C-A9A2-4BE53B950D0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5B97436-6A32-4B9C-A9A2-4BE53B950D0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0550BD6E-5DB3-4740-8467-38664CB1E5B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0550BD6E-5DB3-4740-8467-38664CB1E5B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0550BD6E-5DB3-4740-8467-38664CB1E5B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0550BD6E-5DB3-4740-8467-38664CB1E5B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0B89616-F074-4BD3-A3A7-3833B6735034}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0B89616-F074-4BD3-A3A7-3833B6735034}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0B89616-F074-4BD3-A3A7-3833B6735034}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0B89616-F074-4BD3-A3A7-3833B6735034}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {06980E48-0220-41D5-B3E2-4C327EC7ECFE}
+	EndGlobalSection
+EndGlobal
