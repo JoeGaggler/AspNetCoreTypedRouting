@@ -15,10 +15,10 @@ namespace Jmg.AspNetCore.TypedRouting
 
 		private class NumberContainer<TChildRouteValues> : INumberContainer
 		{
-			private readonly IRouteHandler<TChildRouteValues> ChildRouteHandler;
+			private readonly ITypedRouteHandler<TChildRouteValues> ChildRouteHandler;
 			private readonly Func<TRouteValues, Int32, TChildRouteValues> ChildRouteValuesFunc;
 
-			public NumberContainer(Func<TRouteValues, Int32, TChildRouteValues> childRouteValuesFunc, IRouteHandler<TChildRouteValues> childRouteHandler)
+			public NumberContainer(Func<TRouteValues, Int32, TChildRouteValues> childRouteValuesFunc, ITypedRouteHandler<TChildRouteValues> childRouteHandler)
 			{
 				this.ChildRouteHandler = childRouteHandler;
 				this.ChildRouteValuesFunc = childRouteValuesFunc;
@@ -27,7 +27,7 @@ namespace Jmg.AspNetCore.TypedRouting
 			Task<Boolean> INumberContainer.TryInvokeAsync(HttpContext httpContext, TRouteValues prefix, Int32 number, PathString suffix)
 			{
 				var childValues = this.ChildRouteValuesFunc(prefix, number);
-				return this.ChildRouteHandler.TryInvokeAsync(httpContext, suffix, childValues);
+				return this.ChildRouteHandler.TryInvokeAsync(httpContext, childValues, suffix);
 			}
 		}
 	}

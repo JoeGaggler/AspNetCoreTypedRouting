@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Jmg.AspNetCore.TypedRouting.WebTest
 {
-    public class TypedRouteBuilder : ITypedRouteBuilder
+    public class TestRouteFactory : ITypedRouteFactory<RootRouteValues>
     {
-		void ITypedRouteBuilder.Configure(IRouteBuilder<RootRouteValues> root)
+		public void Configure(ITypedRouteBuilder<RootRouteValues> root)
 		{
 			var clientRoute = root.Add("Client", (_, clientId) => new ClientRouteValues(clientId));
 			var clientUserRoute = clientRoute.Add("User", (client, userId) => new ClientUserRouteValues(client, userId));

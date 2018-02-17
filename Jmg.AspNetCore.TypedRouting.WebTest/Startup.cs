@@ -16,9 +16,8 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-			services.AddSingleton<TypedRoutingMiddleware>();
-			services.AddSingleton<ITypedRouteBuilder, TypedRouteBuilder>();
-			services.AddSingleton<TypedRouter>();
+			services.AddSingleton<TypedRoutingMiddleware<RootRouteValues>>();
+			services.AddSingleton<ITypedRouteFactory<RootRouteValues>, TestRouteFactory>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -29,16 +28,11 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
                 app.UseDeveloperExceptionPage();
             }
 
-			app.UseTypedRouting();
-
-			//app.UseTypedRouting(root =>
-			//{
-			//	root.Add("Client", (_, c) => c);
-			//});
+			app.UseTypedRouting<RootRouteValues>();
 
             app.Run(async (context) =>
             {
-                await context.Response.WriteAsync("Hello World!");
+                await context.Response.WriteAsync("Invalid route");
             });
         }
     }

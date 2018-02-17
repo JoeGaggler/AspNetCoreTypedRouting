@@ -12,6 +12,12 @@ namespace Jmg.AspNetCore.TypedRouting
 	/// <typeparam name="TRouteValues">Route values</typeparam>
     public interface IEndpoint<TRouteValues>
     {
+		/// <summary>
+		/// Runs the endpoint
+		/// </summary>
+		/// <param name="httpContext">Current HTTP context</param>
+		/// <param name="routeValues">Route values for the current request</param>
+		/// <returns>Task that completes when the endpoint has returned an HTTP response</returns>
 		Task Run(HttpContext httpContext, TRouteValues routeValues);
     }
 }

@@ -15,10 +15,10 @@ namespace Jmg.AspNetCore.TypedRouting
 
 		private class PathContainer<TChildRouteValues> : IPathContainer
 		{
-			private readonly IRouteHandler<TChildRouteValues> ChildRouteHandler;
+			private readonly ITypedRouteHandler<TChildRouteValues> ChildRouteHandler;
 			private readonly Func<TRouteValues, TChildRouteValues> ChildRouteValuesFunc;
 
-			public PathContainer(Func<TRouteValues, TChildRouteValues> childRouteValuesFunc, IRouteHandler<TChildRouteValues> childRouteHandler)
+			public PathContainer(Func<TRouteValues, TChildRouteValues> childRouteValuesFunc, ITypedRouteHandler<TChildRouteValues> childRouteHandler)
 			{
 				this.ChildRouteHandler = childRouteHandler;
 				this.ChildRouteValuesFunc = childRouteValuesFunc;
@@ -27,7 +27,7 @@ namespace Jmg.AspNetCore.TypedRouting
 			Task<Boolean> IPathContainer.TryInvokeAsync(HttpContext httpContext, TRouteValues prefix, PathString suffix)
 			{
 				var childValues = this.ChildRouteValuesFunc(prefix);
-				return this.ChildRouteHandler.TryInvokeAsync(httpContext, suffix, childValues);
+				return this.ChildRouteHandler.TryInvokeAsync(httpContext, childValues, suffix);
 			}
 		}
 	}

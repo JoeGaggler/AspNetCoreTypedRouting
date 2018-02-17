@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace Jmg.AspNetCore.TypedRouting
 {
-	internal partial class InternalRouter<TRouteValues> :
-		IRouteBuilder<TRouteValues>,
-		IRouteHandler<TRouteValues>
+	/// <summary>
+	/// Builds and handles routes
+	/// </summary>
+	/// <typeparam name="TRouteValues">Route values that represent the current path</typeparam>
+	public partial class InternalRouter<TRouteValues> :
+		ITypedRouteBuilder<TRouteValues>,
+		ITypedRouteHandler<TRouteValues>
 	{
 		// Child routes
 		private Dictionary<String, IPathContainer> pathEntries = new Dictionary<String, IPathContainer>();
@@ -23,9 +27,9 @@ namespace Jmg.AspNetCore.TypedRouting
 
 		}
 
-		IEndpoint<TRouteValues> IRouteBuilder<TRouteValues>.Endpoint { get => this.endpoint; set => this.endpoint = value; }
+		IEndpoint<TRouteValues> ITypedRouteBuilder<TRouteValues>.Endpoint { get => this.endpoint; set => this.endpoint = value; }
 
-		IRouteBuilder<TChildRouteValues> IRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, TChildRouteValues> func)
+		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, TChildRouteValues> func)
 		{
 			AssertNewSegment(segment);
 
@@ -35,7 +39,7 @@ namespace Jmg.AspNetCore.TypedRouting
 			return nextRouteHandler;
 		}
 
-		IRouteBuilder<TChildRouteValues> IRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, Int32, TChildRouteValues> func)
+		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, Int32, TChildRouteValues> func)
 		{
 			AssertNewSegment(segment);
 
@@ -45,7 +49,7 @@ namespace Jmg.AspNetCore.TypedRouting
 			return nextRouteHandler;
 		}
 
-		IRouteBuilder<TChildRouteValues> IRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, Guid, TChildRouteValues> func)
+		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, Guid, TChildRouteValues> func)
 		{
 			AssertNewSegment(segment);
 
@@ -67,7 +71,7 @@ namespace Jmg.AspNetCore.TypedRouting
 			this.pathEntries.ContainsKey(segment) ||
 			this.numberEntries.ContainsKey(segment);
 
-		async Task<Boolean> IRouteHandler<TRouteValues>.TryInvokeAsync(HttpContext httpContext, PathString path, TRouteValues values)
+		async Task<Boolean> ITypedRouteHandler<TRouteValues>.TryInvokeAsync(HttpContext httpContext, TRouteValues values, PathString path)
 		{
 			if (!path.HasValue || path == "/")
 			{

@@ -15,10 +15,10 @@ namespace Jmg.AspNetCore.TypedRouting
 
 		private class GuidContainer<TChildRouteValues> : IGuidContainer
 		{
-			private readonly IRouteHandler<TChildRouteValues> ChildRouteHandler;
+			private readonly ITypedRouteHandler<TChildRouteValues> ChildRouteHandler;
 			private readonly Func<TRouteValues, Guid, TChildRouteValues> ChildRouteValuesFunc;
 
-			public GuidContainer(Func<TRouteValues, Guid, TChildRouteValues> childRouteValuesFunc, IRouteHandler<TChildRouteValues> childRouteHandler)
+			public GuidContainer(Func<TRouteValues, Guid, TChildRouteValues> childRouteValuesFunc, ITypedRouteHandler<TChildRouteValues> childRouteHandler)
 			{
 				this.ChildRouteHandler = childRouteHandler;
 				this.ChildRouteValuesFunc = childRouteValuesFunc;
@@ -27,7 +27,7 @@ namespace Jmg.AspNetCore.TypedRouting
 			Task<Boolean> IGuidContainer.TryInvokeAsync(HttpContext httpContext, TRouteValues prefix, Guid guid, PathString suffix)
 			{
 				var childValues = this.ChildRouteValuesFunc(prefix, guid);
-				return this.ChildRouteHandler.TryInvokeAsync(httpContext, suffix, childValues);
+				return this.ChildRouteHandler.TryInvokeAsync(httpContext, childValues, suffix);
 			}
 		}
 	}

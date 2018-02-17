@@ -5,17 +5,30 @@ using System.Threading.Tasks;
 
 namespace Jmg.AspNetCore.TypedRouting
 {
-	public class TypedRoutingMiddleware : IMiddleware
+	/// <summary>
+	/// Middleware that implements Typed Routing
+	/// </summary>
+	/// <typeparam name="TRootRouteValues">Route route values</typeparam>
+	public class TypedRoutingMiddleware<TRootRouteValues> : IMiddleware
 	{
-		public TypedRoutingMiddleware()
-		{
+		private readonly ITypedRouteHandler<RootRouteValues> routeHander;
 
+		/// <summary>
+		/// Constructs the middleware
+		/// </summary>
+		/// <param name="config">Injected dependency for route configuration</param>
+		public TypedRoutingMiddleware(ITypedRouteFactory<TRootRouteValues> config)
+		{
+			var routeHandler = new InternalRouter<RootRouteValues>();
+			config.Configure(routeHandler);
+			this.routeHander = routeHandler;
 		}
 
 		async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
 		{
-			var router = context.RequestServices.GetService<TypedRouter>();
-			if (!await router.TryInvokeAsync(context))
+			var router = this.routeHander;
+			var path = context.Request.Path;
+			if (!await router.TryInvokeAsync(context, RootRouteValues.Instance, path))
 			{
 				await next(context);
 			}

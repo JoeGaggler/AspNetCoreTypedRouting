@@ -9,11 +9,11 @@ namespace Jmg.AspNetCore.TypedRouting
 	/// </summary>
 	public class RootRouteValues
 	{
+		/// <summary>
+		/// Singleton instance of <see cref="RootRouteValues"/>
+		/// </summary>
 		public static RootRouteValues Instance = new RootRouteValues();
 
-		private RootRouteValues()
-		{
-
-		}
+		private RootRouteValues() { }
 	}
 }
