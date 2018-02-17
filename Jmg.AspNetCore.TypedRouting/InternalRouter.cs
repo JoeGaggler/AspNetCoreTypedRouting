@@ -13,36 +13,45 @@ namespace Jmg.AspNetCore.TypedRouting
 		// Child routes
 		private Dictionary<String, IPathContainer> pathEntries = new Dictionary<String, IPathContainer>();
 		private Dictionary<String, INumberContainer> numberEntries = new Dictionary<String, INumberContainer>();
+		private Dictionary<String, IGuidContainer> guidEntries = new Dictionary<String, IGuidContainer>();
 
 		private IEndpoint<TRouteValues> endpoint;
+
 
 		public InternalRouter()
 		{
 
 		}
 
-		void IRouteBuilder<TRouteValues>.SetEndpoint(IEndpoint<TRouteValues> endpoint)
-		{
-			this.endpoint = endpoint;
-		}
+		IEndpoint<TRouteValues> IRouteBuilder<TRouteValues>.Endpoint { get => this.endpoint; set => this.endpoint = value; }
 
-		IRouteBuilder<TChildRouteValues> IRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, TChildRouteValues> routeValuesFunc)
+		IRouteBuilder<TChildRouteValues> IRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, TChildRouteValues> func)
 		{
 			AssertNewSegment(segment);
 
 			var nextRouteHandler = new InternalRouter<TChildRouteValues>();
-			var container = new PathContainer<TChildRouteValues>(routeValuesFunc, nextRouteHandler);
+			var container = new PathContainer<TChildRouteValues>(func, nextRouteHandler);
 			this.pathEntries[segment] = container;
 			return nextRouteHandler;
 		}
 
-		IRouteBuilder<TChildRouteValues> IRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, Int32, TChildRouteValues> routeValuesFunc)
+		IRouteBuilder<TChildRouteValues> IRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, Int32, TChildRouteValues> func)
 		{
 			AssertNewSegment(segment);
 
 			var nextRouteHandler = new InternalRouter<TChildRouteValues>();
-			var container = new NumberContainer<TChildRouteValues>(routeValuesFunc, nextRouteHandler);
+			var container = new NumberContainer<TChildRouteValues>(func, nextRouteHandler);
 			this.numberEntries[segment] = container;
+			return nextRouteHandler;
+		}
+
+		IRouteBuilder<TChildRouteValues> IRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, Guid, TChildRouteValues> func)
+		{
+			AssertNewSegment(segment);
+
+			var nextRouteHandler = new InternalRouter<TChildRouteValues>();
+			var container = new GuidContainer<TChildRouteValues>(func, nextRouteHandler);
+			this.guidEntries[segment] = container;
 			return nextRouteHandler;
 		}
 
@@ -80,17 +89,27 @@ namespace Jmg.AspNetCore.TypedRouting
 
 			if (pathEntries.TryGetValue(prefix, out var pathContainer))
 			{
-				return await pathContainer.TryInvokeAsync(httpContext, suffix, values);
+				return await pathContainer.TryInvokeAsync(httpContext, values, suffix);
 			}
 			else if (numberEntries.TryGetValue(prefix, out var numberContainer))
 			{
-				if (!suffix.TryGetStartingSegment(out var numberPrefix, out var numberSuffix) ||
-					!Int32.TryParse(numberPrefix, out var number))
+				if (!suffix.TryGetStartingSegment(out var keyPrefix, out var keySuffix) ||
+					!Int32.TryParse(keyPrefix, out var key))
 				{
 					return false;
 				}
 
-				return await numberContainer.TryInvokeAsync(httpContext, numberSuffix, values, number);
+				return await numberContainer.TryInvokeAsync(httpContext, values, key, keySuffix);
+			}
+			else if (guidEntries.TryGetValue(prefix, out var guidContainer))
+			{
+				if (!suffix.TryGetStartingSegment(out var keyPrefix, out var keySuffix) ||
+					!Guid.TryParse(keyPrefix, out var key))
+				{
+					return false;
+				}
+
+				return await guidContainer.TryInvokeAsync(httpContext, values, key, keySuffix);
 			}
 			else
 			{

@@ -12,7 +12,7 @@ namespace Jmg.AspNetCore.TypedRouting.Tests
 		[TestMethod]
 		public void TestMethod1()
 		{
-			var applicationBuilder = new MyApplicationBuilder();
+			//var applicationBuilder = new MyApplicationBuilder();
 
 			//var next = applicationBuilder.UseTypedRouting(root =>
 			//{

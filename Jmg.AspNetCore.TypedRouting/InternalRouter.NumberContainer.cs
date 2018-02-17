@@ -10,7 +10,7 @@ namespace Jmg.AspNetCore.TypedRouting
 	{
 		private interface INumberContainer
 		{
-			Task<Boolean> TryInvokeAsync(HttpContext httpContext, PathString pathString, TRouteValues routeValues, Int32 number);
+			Task<Boolean> TryInvokeAsync(HttpContext httpContext, TRouteValues prefix, Int32 number, PathString suffix);
 		}
 
 		private class NumberContainer<TChildRouteValues> : INumberContainer
@@ -24,10 +24,10 @@ namespace Jmg.AspNetCore.TypedRouting
 				this.ChildRouteValuesFunc = childRouteValuesFunc;
 			}
 
-			Task<Boolean> INumberContainer.TryInvokeAsync(HttpContext httpContext, PathString right, TRouteValues leftValues, Int32 number)
+			Task<Boolean> INumberContainer.TryInvokeAsync(HttpContext httpContext, TRouteValues prefix, Int32 number, PathString suffix)
 			{
-				var childValues = this.ChildRouteValuesFunc(leftValues, number);
-				return this.ChildRouteHandler.TryInvokeAsync(httpContext, right, childValues);
+				var childValues = this.ChildRouteValuesFunc(prefix, number);
+				return this.ChildRouteHandler.TryInvokeAsync(httpContext, suffix, childValues);
 			}
 		}
 	}

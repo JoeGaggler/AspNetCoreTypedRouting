@@ -14,6 +14,8 @@ namespace Jmg.AspNetCore.TypedRouting
 
 		IRouteBuilder<TChildRouteValues> Add<TChildRouteValues>(String segment, Func<TRouteValues, Int32, TChildRouteValues> func);
 
-		void SetEndpoint(IEndpoint<TRouteValues> endpoint);
+		IRouteBuilder<TChildRouteValues> Add<TChildRouteValues>(String segment, Func<TRouteValues, Guid, TChildRouteValues> func);
+
+		IEndpoint<TRouteValues> Endpoint { get; set; }
 	}
 }

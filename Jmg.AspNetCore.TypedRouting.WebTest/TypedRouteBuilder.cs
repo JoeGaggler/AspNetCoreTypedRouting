@@ -11,9 +11,11 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
 		{
 			var clientRoute = root.Add("Client", (_, clientId) => new ClientRouteValues(clientId));
 			var clientUserRoute = clientRoute.Add("User", (client, userId) => new ClientUserRouteValues(client, userId));
+			var clientUserTaskRoute = clientUserRoute.Add("Task", (user, taskId) => new ClientUserTaskRouteValues(user, taskId));
 			var clientUserPassword = clientUserRoute.Add("Settings", (user) => user);
 
-			clientRoute.SetEndpoint(new ClientEndpoint());
+			clientRoute.Endpoint = new ClientEndpoint();
+			clientUserTaskRoute.Endpoint = new ClientEndpoint();
 		}
 	}
 }
