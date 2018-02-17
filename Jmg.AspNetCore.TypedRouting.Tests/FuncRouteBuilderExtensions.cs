@@ -18,7 +18,7 @@ namespace Jmg.AspNetCore.TypedRouting.Tests
 			builder.AttachFunc((rv) => { action(rv); return Task.CompletedTask; });
 		}
 
-		private class Endpoint<TRouteValues> : IEndpoint<TRouteValues>
+		private class Endpoint<TRouteValues> : ITypedRoutingEndpoint<TRouteValues>
 		{
 			private readonly Func<TRouteValues, Task> func;
 

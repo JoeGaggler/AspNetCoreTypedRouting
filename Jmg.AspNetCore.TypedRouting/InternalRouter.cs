@@ -19,7 +19,7 @@ namespace Jmg.AspNetCore.TypedRouting
 		private Dictionary<String, INumberContainer> numberEntries = new Dictionary<String, INumberContainer>();
 		private Dictionary<String, IGuidContainer> guidEntries = new Dictionary<String, IGuidContainer>();
 
-		private IEndpoint<TRouteValues> endpoint;
+		private ITypedRoutingEndpoint<TRouteValues> endpoint;
 
 
 		public InternalRouter()
@@ -27,7 +27,7 @@ namespace Jmg.AspNetCore.TypedRouting
 
 		}
 
-		IEndpoint<TRouteValues> ITypedRouteBuilder<TRouteValues>.Endpoint { get => this.endpoint; set => this.endpoint = value; }
+		ITypedRoutingEndpoint<TRouteValues> ITypedRouteBuilder<TRouteValues>.Endpoint { get => this.endpoint; set => this.endpoint = value; }
 
 		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.Add<TChildRouteValues>(String segment, Func<TRouteValues, TChildRouteValues> func)
 		{

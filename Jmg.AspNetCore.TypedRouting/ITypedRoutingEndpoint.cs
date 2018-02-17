@@ -10,7 +10,7 @@ namespace Jmg.AspNetCore.TypedRouting
 	/// Interface for a type that handles an <see cref="HttpContext"/> for a set of route values
 	/// </summary>
 	/// <typeparam name="TRouteValues">Route values</typeparam>
-    public interface IEndpoint<TRouteValues>
+    public interface ITypedRoutingEndpoint<TRouteValues>
     {
 		/// <summary>
 		/// Runs the endpoint

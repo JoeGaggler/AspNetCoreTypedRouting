@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Http;
 namespace Jmg.AspNetCore.TypedRouting.WebTest
 {
 	public class ClientEndpoint : 
-		IEndpoint<ClientRouteValues>,
-		IEndpoint<ClientUserTaskRouteValues>
+		ITypedRoutingEndpoint<ClientRouteValues>,
+		ITypedRoutingEndpoint<ClientUserTaskRouteValues>
 	{
-		Task IEndpoint<ClientRouteValues>.Run(HttpContext httpContext, ClientRouteValues routeValues)
+		Task ITypedRoutingEndpoint<ClientRouteValues>.Run(HttpContext httpContext, ClientRouteValues routeValues)
 		{
 			var contextResponse = httpContext.Response;
 			var stringResponse = $"Hello, world. {routeValues.ClientId}";
@@ -20,7 +20,7 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
 			return Task.CompletedTask;
 		}
 
-		Task IEndpoint<ClientUserTaskRouteValues>.Run(HttpContext httpContext, ClientUserTaskRouteValues routeValues)
+		Task ITypedRoutingEndpoint<ClientUserTaskRouteValues>.Run(HttpContext httpContext, ClientUserTaskRouteValues routeValues)
 		{
 			var contextResponse = httpContext.Response;
 			var stringResponse = $"Hello, world. GUID: {routeValues.TaskId}";

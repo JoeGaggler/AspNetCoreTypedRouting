@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <VersionPrefix>0.0.0</VersionPrefix>
+    <VersionSuffix>bootstrap</VersionSuffix>
+    <Authors>JoeGaggler</Authors>
+    <Description>Typed Routing for ASP.NET Core</Description>
   </PropertyGroup>
 
   <ItemGroup>
