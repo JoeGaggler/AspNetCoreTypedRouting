@@ -7,10 +7,11 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
 {
     public class TypedRouteBuilder : ITypedRouteBuilder
     {
-		void ITypedRouteBuilder.Configure(IRouteBuilder<RootRouteValues> builder)
+		void ITypedRouteBuilder.Configure(IRouteBuilder<RootRouteValues> root)
 		{
-			var clientRoute = builder.Add("Client", (root, clientId) => new ClientRouteValues(clientId));
+			var clientRoute = root.Add("Client", (_, clientId) => new ClientRouteValues(clientId));
 			var clientUserRoute = clientRoute.Add("User", (client, userId) => new ClientUserRouteValues(client, userId));
+			var clientUserPassword = clientUserRoute.Add("Settings", (user) => user);
 
 			clientRoute.SetEndpoint(new ClientEndpoint());
 		}
