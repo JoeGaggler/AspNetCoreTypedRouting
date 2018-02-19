@@ -6,11 +6,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace Jmg.AspNetCore.TypedRouting.RouteHandlers
 {
-	internal interface ILiteralRouteHandler<TRouteValues>
-	{
-		Task<Boolean> TryInvokeAsync(HttpContext httpContext, TRouteValues routeValues, PathString suffix);
-	}
-
 	internal class SingleLiteral<TRouteValues, TChildRouteValues> : ITypedRouteHandler<TRouteValues>
 	{
 		private readonly String literal;

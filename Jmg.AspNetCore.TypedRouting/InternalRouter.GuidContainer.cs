@@ -10,6 +10,7 @@ namespace Jmg.AspNetCore.TypedRouting
 	{
 		private interface IGuidContainer
 		{
+			ITypedRouteHandler<TRouteValues> Build(ITypedRoutingEndpoint<TRouteValues> endpoint);
 		}
 
 		private class GuidContainer<TChildRouteValues> : IGuidContainer
@@ -21,6 +22,12 @@ namespace Jmg.AspNetCore.TypedRouting
 			{
 				this.ChildBuilder = childBuilder;
 				this.ChildRouteValuesFunc = childRouteValuesFunc;
+			}
+
+			ITypedRouteHandler<TRouteValues> IGuidContainer.Build(ITypedRoutingEndpoint<TRouteValues> endpoint)
+			{
+				var next = this.ChildBuilder.Build();
+				return new RouteHandlers.Guid<TRouteValues, TChildRouteValues>(endpoint, this.ChildRouteValuesFunc, next);
 			}
 		}
 	}

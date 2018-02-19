@@ -128,17 +128,31 @@ namespace Jmg.AspNetCore.TypedRouting
 
 		ITypedRouteHandler<TRouteValues> ITypedRouteBuilder<TRouteValues>.Build()
 		{
-			if (this.pathEntries.Count == 1 && this.numberContainer == null && this.guidContainer == null)
+			var pathCount = this.pathEntries.Count;
+			if (pathCount > 0)
 			{
-				var first = this.pathEntries.First();
-				var literal = first.Key;
-				var entry = first.Value;
-				return entry.Build(literal, endpoint);
+				if (pathCount == 1)
+				{
+					var first = this.pathEntries.First();
+					var literal = first.Key;
+					var entry = first.Value;
+					return entry.BuildSingle(literal, endpoint);
+				}
+				else
+				{
+					IEnumerable<RouteHandlers.IMultiLiteralContainer<TRouteValues>> items = this.pathEntries.Select(i => i.Value.BuildMulti(i.Key));
+					return new RouteHandlers.MultiLiteral<TRouteValues>(this.endpoint, items);
+				}
 			}
 
 			if (this.numberContainer != null)
 			{
 				return this.numberContainer.Build(this.endpoint);
+			}
+
+			if (this.guidContainer != null)
+			{
+				return this.guidContainer.Build(this.endpoint);
 			}
 
 			return new RouteHandlers.Leaf<TRouteValues>(this.endpoint);
