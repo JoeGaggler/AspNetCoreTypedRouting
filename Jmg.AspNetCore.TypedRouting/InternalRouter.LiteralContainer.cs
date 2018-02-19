@@ -13,12 +13,12 @@ namespace Jmg.AspNetCore.TypedRouting
 			Task<Boolean> TryInvokeAsync(HttpContext httpContext, TRouteValues prefix, PathString suffix);
 		}
 
-		private class PathContainer<TChildRouteValues> : IPathContainer
+		private class LiteralContainer<TChildRouteValues> : IPathContainer
 		{
 			private readonly ITypedRouteHandler<TChildRouteValues> ChildRouteHandler;
 			private readonly Func<TRouteValues, TChildRouteValues> ChildRouteValuesFunc;
 
-			public PathContainer(Func<TRouteValues, TChildRouteValues> childRouteValuesFunc, ITypedRouteHandler<TChildRouteValues> childRouteHandler)
+			public LiteralContainer(Func<TRouteValues, TChildRouteValues> childRouteValuesFunc, ITypedRouteHandler<TChildRouteValues> childRouteHandler)
 			{
 				this.ChildRouteHandler = childRouteHandler;
 				this.ChildRouteValuesFunc = childRouteValuesFunc;

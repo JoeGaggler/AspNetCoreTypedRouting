@@ -7,15 +7,18 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
 {
     public class TestRouteFactory : ITypedRouteFactory<RootRouteValues>
     {
-		public void Configure(ITypedRouteBuilder<RootRouteValues> root)
+		public void Configure(TypedRouter typedRouter)
 		{
-			var clientRoute = root.Add("Client", (_, clientId) => new ClientRouteValues(clientId));
-			var clientUserRoute = clientRoute.Add("User", (client, userId) => new ClientUserRouteValues(client, userId));
-			var clientUserTaskRoute = clientUserRoute.Add("Task", (user, taskId) => new ClientUserTaskRouteValues(user, taskId));
-			var clientUserPassword = clientUserRoute.Add("Settings", (user) => user);
+			var root = typedRouter.RootRoute;
 
-			clientRoute.Endpoint = new ClientEndpoint();
-			clientUserTaskRoute.Endpoint = new ClientEndpoint();
+			var clientRoute = root.AddNamedNumber("Client", (_, clientId) => new ClientRouteValues(clientId), (c) => RootRouteValues.Instance, (c) => c.ClientId);
+			var clientUserRoute = clientRoute.AddNamedNumber("User", (client, userId) => new ClientUserRouteValues(client, userId), (c) => new ClientRouteValues(c.ClientId), (c) => c.UserId);
+			var clientUserTaskRoute = clientUserRoute.AddNamedGuid("Task", (user, taskId) => new ClientUserTaskRouteValues(user, taskId), (c) => new ClientUserRouteValues(c.ClientId, c.UserId), (c) => c.TaskId);
+			var clientUserPassword = clientUserRoute.AddLiteral("Settings", p => (p, 1), c => c.Item1);
+
+			clientRoute.Endpoint = new StringEndpoint<ClientRouteValues>(c => $"Client: {c.ClientId} - {typedRouter.GetPath(c)}");
+			clientUserRoute.Endpoint = new StringEndpoint<ClientUserRouteValues>(c => $"Client User: {c.ClientId} {c.UserId} - {typedRouter.GetPath(c)}");
+			clientUserTaskRoute.Endpoint = new StringEndpoint<ClientUserTaskRouteValues>(c => $"Client User Task: {c.ClientId} {c.UserId} {c.TaskId} - {typedRouter.GetPath(c)}");
 		}
 	}
 }

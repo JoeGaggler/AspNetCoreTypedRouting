@@ -14,17 +14,28 @@ namespace Jmg.AspNetCore.TypedRouting.Tests
 		[TestMethod]
 		public async Task InternalRouter_SingleRoute_StringSegment_Test()
 		{
-			var router = new InternalRouter<RootRouteValues>();
-			ITypedRouteBuilder<RootRouteValues> builder = router;
-			ITypedRouteHandler<RootRouteValues> handler = router;
+			var router = new TypedRouter();
+			var rootRoute = router.RootRoute;
+			ITypedRouteBuilder<RootRouteValues> builder = rootRoute;
+			ITypedRouteHandler<RootRouteValues> handler = rootRoute;
 
-			var folder1Route = builder.Add("Folder1", (_) => ("Folder1"));
+			var folder1Route = builder.AddLiteral("Folder1", (_) => new StringRouteValues("Folder1"), (s) => RootRouteValues.Instance);
 
 			Boolean didRun = false;
 			folder1Route.AttachAction(rv => didRun = true);
 			var found = await handler.TryInvokeAsync(null, RootRouteValues.Instance, "/Folder1");
 			Assert.IsTrue(found, "Endpoint not found");
 			Assert.IsTrue(didRun, "Endpoint did not run");
+		}
+
+		public class StringRouteValues
+		{
+			public String Segment { get; }
+
+			public StringRouteValues(String segment)
+			{
+				this.Segment = segment;
+			}
 		}
 	}
 }

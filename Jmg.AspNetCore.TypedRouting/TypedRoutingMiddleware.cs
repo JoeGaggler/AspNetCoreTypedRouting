@@ -11,7 +11,7 @@ namespace Jmg.AspNetCore.TypedRouting
 	/// <typeparam name="TRootRouteValues">Route route values</typeparam>
 	public class TypedRoutingMiddleware<TRootRouteValues> : IMiddleware
 	{
-		private readonly ITypedRouteHandler<RootRouteValues> routeHander;
+		private readonly TypedRouter typedRouter;
 
 		/// <summary>
 		/// Constructs the middleware
@@ -19,14 +19,15 @@ namespace Jmg.AspNetCore.TypedRouting
 		/// <param name="config">Injected dependency for route configuration</param>
 		public TypedRoutingMiddleware(ITypedRouteFactory<TRootRouteValues> config)
 		{
-			var routeHandler = new InternalRouter<RootRouteValues>();
-			config.Configure(routeHandler);
-			this.routeHander = routeHandler;
+			var typedRouter = new TypedRouter();
+			var routeHandler = typedRouter.RootRoute;
+			config.Configure(typedRouter);
+			this.typedRouter = typedRouter;
 		}
 
 		async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
 		{
-			var router = this.routeHander;
+			ITypedRouteHandler<RootRouteValues> router = this.typedRouter.RootRoute;
 			var path = context.Request.Path;
 			if (!await router.TryInvokeAsync(context, RootRouteValues.Instance, path))
 			{
