@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,29 +11,28 @@ namespace Jmg.AspNetCore.TypedRouting
 	/// Builds and handles routes
 	/// </summary>
 	/// <typeparam name="TRouteValues">Route values that represent the current path</typeparam>
-	public partial class InternalRouter<TRouteValues> :
-		ITypedRouteBuilder<TRouteValues>,
-		ITypedRouteHandler<TRouteValues>
+	public partial class InternalRouter<TRouteValues> : ITypedRouteBuilder<TRouteValues>
 	{
-		private readonly TypedRouter typedRouter;
+		//private readonly TypedRouter typedRouter;
 		private readonly Func<TRouteValues, PathString> pathFunc;
 		private readonly TypedRouteOptions options;
 
 		// Child routes
-		private Dictionary<String, IPathContainer> pathEntries = new Dictionary<String, IPathContainer>();
+		private Dictionary<String, ILiteralContainer> pathEntries = new Dictionary<String, ILiteralContainer>();
 		private IGuidContainer guidContainer;
 		private INumberContainer numberContainer;
 
 		private ITypedRoutingEndpoint<TRouteValues> endpoint;
 
-		public InternalRouter(TypedRouter typedRouter, Func<TRouteValues, PathString> pathFunc, TypedRouteOptions options)
+		public InternalRouter(/*TypedRouter typedRouter,*/ Func<TRouteValues, PathString> pathFunc, TypedRouteOptions options)
 		{
-			this.typedRouter = typedRouter;
+			//this.typedRouter = typedRouter;
 			this.pathFunc = pathFunc;
 			this.options = options;
 		}
 
-		ITypedRoutingEndpoint<TRouteValues> ITypedRouteBuilder<TRouteValues>.Endpoint {
+		ITypedRoutingEndpoint<TRouteValues> ITypedRouteBuilder<TRouteValues>.Endpoint
+		{
 			get => this.endpoint;
 			set
 			{
@@ -45,28 +45,28 @@ namespace Jmg.AspNetCore.TypedRouting
 			}
 		}
 
-		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.AddLiteral<TChildRouteValues>(String segment, Func<TRouteValues, TChildRouteValues> func, Func<TChildRouteValues, TRouteValues> reverseFunc, TypedRouteOptions options)
+		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.AddLiteral<TChildRouteValues>(String literal, Func<TRouteValues, TChildRouteValues> func, Func<TChildRouteValues, TRouteValues> reverseFunc, TypedRouteOptions options)
 		{
-			AssertNewSegment(segment);
+			AssertNewSegment(literal);
 
 			Func<TChildRouteValues, PathString> childPathFunc;
 			if (this.pathFunc != null)
 			{
-				childPathFunc = (cv) => pathFunc(reverseFunc(cv)) + new PathString("/" + segment);
+				childPathFunc = (cv) => pathFunc(reverseFunc(cv)) + new PathString("/" + literal);
 			}
 			else
 			{
-				childPathFunc = (cv) => new PathString("/" + segment);
+				childPathFunc = (cv) => new PathString("/" + literal);
 			}
 
 			if (!options.HasFlag(TypedRouteOptions.IntermediateRoute))
 			{
-				this.typedRouter.pathFuncMap[typeof(TChildRouteValues)] = childPathFunc;
+				//this.typedRouter.pathFuncMap[typeof(TChildRouteValues)] = childPathFunc;
 			}
 
-			var nextRouteHandler = new InternalRouter<TChildRouteValues>(this.typedRouter, childPathFunc, options);
-			var container = new LiteralContainer<TChildRouteValues>(func, nextRouteHandler);
-			this.pathEntries[segment] = container;
+			var nextRouteHandler = new InternalRouter<TChildRouteValues>(/*this.typedRouter,*/ childPathFunc, options);
+			var container = new LiteralContainer<TChildRouteValues>(literal, func, nextRouteHandler);
+			this.pathEntries[literal] = container;
 			return nextRouteHandler;
 		}
 
@@ -84,10 +84,10 @@ namespace Jmg.AspNetCore.TypedRouting
 
 			if (!options.HasFlag(TypedRouteOptions.IntermediateRoute))
 			{
-				this.typedRouter.pathFuncMap[typeof(TChildRouteValues)] = childPathFunc;
+				//this.typedRouter.pathFuncMap[typeof(TChildRouteValues)] = childPathFunc;
 			}
 
-			var nextRouteHandler = new InternalRouter<TChildRouteValues>(this.typedRouter, childPathFunc, options);
+			var nextRouteHandler = new InternalRouter<TChildRouteValues>(/*this.typedRouter,*/ childPathFunc, options);
 			var container = new NumberContainer<TChildRouteValues>(func, nextRouteHandler);
 			this.numberContainer = container;
 			return nextRouteHandler;
@@ -107,10 +107,10 @@ namespace Jmg.AspNetCore.TypedRouting
 
 			if (!options.HasFlag(TypedRouteOptions.IntermediateRoute))
 			{
-				this.typedRouter.pathFuncMap[typeof(TChildRouteValues)] = childPathFunc;
+				//this.typedRouter.pathFuncMap[typeof(TChildRouteValues)] = childPathFunc;
 			}
 
-			var nextRouteHandler = new InternalRouter<TChildRouteValues>(this.typedRouter, childPathFunc, options);
+			var nextRouteHandler = new InternalRouter<TChildRouteValues>(/*this.typedRouter,*/ childPathFunc, options);
 			var container = new GuidContainer<TChildRouteValues>(func, nextRouteHandler);
 			this.guidContainer = container;
 			return nextRouteHandler;
@@ -126,52 +126,22 @@ namespace Jmg.AspNetCore.TypedRouting
 
 		private Boolean IsSegmentReserved(String segment) => this.pathEntries.ContainsKey(segment);
 
-		async Task<Boolean> ITypedRouteHandler<TRouteValues>.TryInvokeAsync(HttpContext httpContext, TRouteValues values, PathString path)
+		ITypedRouteHandler<TRouteValues> ITypedRouteBuilder<TRouteValues>.Build()
 		{
-			if (!path.HasValue || path == "/")
+			if (this.pathEntries.Count == 1 && this.numberContainer == null && this.guidContainer == null)
 			{
-				if (this.endpoint == null)
-				{
-					return false;
-				}
-				else
-				{
-					await this.endpoint.Run(httpContext, values);
-					return true;
-				}
+				var first = this.pathEntries.First();
+				var literal = first.Key;
+				var entry = first.Value;
+				return entry.Build(literal, endpoint);
 			}
 
-			if (!path.TryGetStartingSegment(out var prefix, out var suffix))
+			if (this.numberContainer != null)
 			{
-				return false;
+				return this.numberContainer.Build(this.endpoint);
 			}
 
-			if (pathEntries.TryGetValue(prefix, out var pathContainer))
-			{
-				return await pathContainer.TryInvokeAsync(httpContext, values, suffix);
-			}
-			else if (guidContainer != null)
-			{
-				if (!Guid.TryParse(prefix, out var key))
-				{
-					return false;
-				}
-
-				return await guidContainer.TryInvokeAsync(httpContext, values, key, suffix);
-			}
-			else if (numberContainer != null)
-			{
-				if (!Int32.TryParse(prefix, out var key))
-				{
-					return false;
-				}
-
-				return await numberContainer.TryInvokeAsync(httpContext, values, key, suffix);
-			}
-			else
-			{
-				return false;
-			}
+			return new RouteHandlers.Leaf<TRouteValues>(this.endpoint);
 		}
 	}
 }

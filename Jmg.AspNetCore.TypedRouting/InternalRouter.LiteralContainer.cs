@@ -6,28 +6,31 @@ using System.Threading.Tasks;
 
 namespace Jmg.AspNetCore.TypedRouting
 {
-    partial class InternalRouter<TRouteValues>
-    {
-		private interface IPathContainer
+	partial class InternalRouter<TRouteValues>
+	{
+		private interface ILiteralContainer
 		{
-			Task<Boolean> TryInvokeAsync(HttpContext httpContext, TRouteValues prefix, PathString suffix);
+			ITypedRouteHandler<TRouteValues> Build(String literal, ITypedRoutingEndpoint<TRouteValues> endpoint);
 		}
 
-		private class LiteralContainer<TChildRouteValues> : IPathContainer
+		private class LiteralContainer<TChildRouteValues> : ILiteralContainer
 		{
-			private readonly ITypedRouteHandler<TChildRouteValues> ChildRouteHandler;
+			private readonly ITypedRouteBuilder<TChildRouteValues> ChildBuilder;
 			private readonly Func<TRouteValues, TChildRouteValues> ChildRouteValuesFunc;
 
-			public LiteralContainer(Func<TRouteValues, TChildRouteValues> childRouteValuesFunc, ITypedRouteHandler<TChildRouteValues> childRouteHandler)
+			public String Literal { get; private set; }
+
+			public LiteralContainer(String literal, Func<TRouteValues, TChildRouteValues> childRouteValuesFunc, ITypedRouteBuilder<TChildRouteValues> childBuilder)
 			{
-				this.ChildRouteHandler = childRouteHandler;
+				this.Literal = literal;
+				this.ChildBuilder = childBuilder;
 				this.ChildRouteValuesFunc = childRouteValuesFunc;
 			}
 
-			Task<Boolean> IPathContainer.TryInvokeAsync(HttpContext httpContext, TRouteValues prefix, PathString suffix)
+			ITypedRouteHandler<TRouteValues> ILiteralContainer.Build(String literal, ITypedRoutingEndpoint<TRouteValues> endpoint)
 			{
-				var childValues = this.ChildRouteValuesFunc(prefix);
-				return this.ChildRouteHandler.TryInvokeAsync(httpContext, childValues, suffix);
+				var next = this.ChildBuilder.Build();
+				return new RouteHandlers.SingleLiteral<TRouteValues, TChildRouteValues>(literal, endpoint, this.ChildRouteValuesFunc, next);
 			}
 		}
 	}

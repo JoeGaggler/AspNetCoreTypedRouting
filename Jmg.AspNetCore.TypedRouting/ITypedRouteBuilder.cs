@@ -39,5 +39,7 @@ namespace Jmg.AspNetCore.TypedRouting
 		/// Endpoint that handles requests for this path
 		/// </summary>
 		ITypedRoutingEndpoint<TRouteValues> Endpoint { get; set; }
+
+		ITypedRouteHandler<TRouteValues> Build();
 	}
 }

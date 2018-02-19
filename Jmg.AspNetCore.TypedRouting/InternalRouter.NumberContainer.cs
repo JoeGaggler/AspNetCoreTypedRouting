@@ -10,24 +10,24 @@ namespace Jmg.AspNetCore.TypedRouting
 	{
 		private interface INumberContainer
 		{
-			Task<Boolean> TryInvokeAsync(HttpContext httpContext, TRouteValues prefix, Int32 number, PathString suffix);
+			ITypedRouteHandler<TRouteValues> Build(ITypedRoutingEndpoint<TRouteValues> endpoint);
 		}
 
 		private class NumberContainer<TChildRouteValues> : INumberContainer
 		{
-			private readonly ITypedRouteHandler<TChildRouteValues> ChildRouteHandler;
+			private readonly ITypedRouteBuilder<TChildRouteValues> ChildBuilder;
 			private readonly Func<TRouteValues, Int32, TChildRouteValues> ChildRouteValuesFunc;
 
-			public NumberContainer(Func<TRouteValues, Int32, TChildRouteValues> childRouteValuesFunc, ITypedRouteHandler<TChildRouteValues> childRouteHandler)
+			public NumberContainer(Func<TRouteValues, Int32, TChildRouteValues> childRouteValuesFunc, ITypedRouteBuilder<TChildRouteValues> childBuilder)
 			{
-				this.ChildRouteHandler = childRouteHandler;
+				this.ChildBuilder = childBuilder;
 				this.ChildRouteValuesFunc = childRouteValuesFunc;
 			}
 
-			Task<Boolean> INumberContainer.TryInvokeAsync(HttpContext httpContext, TRouteValues prefix, Int32 number, PathString suffix)
+			ITypedRouteHandler<TRouteValues> INumberContainer.Build(ITypedRoutingEndpoint<TRouteValues> endpoint)
 			{
-				var childValues = this.ChildRouteValuesFunc(prefix, number);
-				return this.ChildRouteHandler.TryInvokeAsync(httpContext, childValues, suffix);
+				var next = this.ChildBuilder.Build();
+				return new RouteHandlers.Number<TRouteValues, TChildRouteValues>(endpoint, this.ChildRouteValuesFunc, next);
 			}
 		}
 	}

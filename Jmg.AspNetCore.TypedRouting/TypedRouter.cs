@@ -2,19 +2,25 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Jmg.AspNetCore.TypedRouting
 {
-    public class TypedRouter
+    public class TypedRouter<TRootRouteValues>
     {
-		public InternalRouter<RootRouteValues> RootRoute { get; private set; }
+		// TODO: Separate building from handling
+		//public InternalRouter<RootRouteValues> RootRoute { get; private set; }
+
+		private readonly ITypedRouteHandler<TRootRouteValues> rootRouteHandler;
+		private readonly TRootRouteValues rootRouteValues;
 
 		// TODO: Make private
 		internal Dictionary<Type, Object> pathFuncMap = new Dictionary<Type, Object>(); // Object is Func<TRouteValues, PathString>
 
-		public TypedRouter()
+		public TypedRouter(ITypedRouteHandler<TRootRouteValues> handler, TRootRouteValues rootRouteValues)
 		{
-			this.RootRoute = new InternalRouter<RootRouteValues>(this, null, TypedRouteOptions.None);
+			this.rootRouteHandler = handler;
+			this.rootRouteValues = rootRouteValues;
 		}
 
 		public PathString GetPath<TRouteValues>(TRouteValues routeValues)
@@ -25,6 +31,12 @@ namespace Jmg.AspNetCore.TypedRouting
 			}
 
 			return pathFunc(routeValues);
+		}
+
+		public async Task<Boolean> TryInvokeAsync(HttpContext httpContext)
+		{
+			var path = httpContext.Request.Path;
+			return await this.rootRouteHandler.TryInvokeAsync(httpContext, this.rootRouteValues, path);
 		}
 	}
 }
