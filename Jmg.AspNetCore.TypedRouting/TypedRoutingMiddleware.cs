@@ -19,13 +19,14 @@ namespace Jmg.AspNetCore.TypedRouting
 		/// <param name="config">Injected dependency for route configuration</param>
 		public TypedRoutingMiddleware(ITypedRouteFactory<TRootRouteValues> config)
 		{
-			ITypedRouteBuilder<TRootRouteValues> builder = new InternalRouter<TRootRouteValues>(/*this,*/ null, TypedRouteOptions.None);
+			TypedRoutePathFactory pathBuilder = new TypedRoutePathFactory();
+			ITypedRouteBuilder<TRootRouteValues> builder = new InternalBuilder<TRootRouteValues>(pathBuilder, null, TypedRouteOptions.None);
 
-			config.Configure(builder);
+			config.Configure(builder, pathBuilder);
 
 			var handler = builder.Build();			
 
-			var typedRouter = new TypedRouter<TRootRouteValues>(handler, config.RootRouteValues);
+			var typedRouter = new TypedRouter<TRootRouteValues>(handler, pathBuilder, config.RootRouteValues);
 			this.typedRouter = typedRouter;
 		}
 

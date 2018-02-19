@@ -10,7 +10,7 @@ namespace Jmg.AspNetCore.TypedRouting
 	/// <typeparam name="TRootRouteValues">Root route values</typeparam>
     public interface ITypedRouteFactory<TRootRouteValues>
     {
-		void Configure(ITypedRouteBuilder<TRootRouteValues> typedRouter);
+		void Configure(ITypedRouteBuilder<TRootRouteValues> typedRouter, ITypedRoutePathFactory pathFactory);
 
 		TRootRouteValues RootRouteValues { get; }
 	}

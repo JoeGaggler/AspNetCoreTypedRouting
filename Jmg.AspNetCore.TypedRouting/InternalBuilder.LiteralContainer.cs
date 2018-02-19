@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Jmg.AspNetCore.TypedRouting
 {
-	partial class InternalRouter<TRouteValues>
+	partial class InternalBuilder<TRouteValues>
 	{
 		private interface ILiteralContainer
 		{
