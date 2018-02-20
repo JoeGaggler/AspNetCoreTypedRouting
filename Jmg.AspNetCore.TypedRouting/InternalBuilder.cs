@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 namespace Jmg.AspNetCore.TypedRouting
 {
 	/// <summary>
-	/// Builds and handles routes
+	/// Internal implementation of the route builder
 	/// </summary>
+	/// <typeparam name="TRootRouteValues">Root route values from the current Typed Routing middleware</typeparam>
 	/// <typeparam name="TRouteValues">Route values that represent the current path</typeparam>
 	internal partial class InternalBuilder<TRootRouteValues, TRouteValues> : ITypedRouteBuilder<TRouteValues>
 	{
-		private readonly TypedRoutePathFactory<TRootRouteValues> pathBuilder;
+		private readonly TypedRoutePathFactory<TRootRouteValues> pathFactory;
 		private readonly Func<TRouteValues, PathString> pathFunc;
 		private readonly TypedRouteOptions options;
 
@@ -22,15 +23,14 @@ namespace Jmg.AspNetCore.TypedRouting
 		private IGuidContainer guidContainer;
 		private INumberContainer numberContainer;
 
-		private ITypedRoutingEndpoint<TRouteValues> endpoint;
-
-		public InternalBuilder(TypedRoutePathFactory<TRootRouteValues> pathBuilder, Func<TRouteValues, PathString> pathFunc, TypedRouteOptions options)
+		public InternalBuilder(TypedRoutePathFactory<TRootRouteValues> pathFactory, Func<TRouteValues, PathString> pathFunc, TypedRouteOptions options)
 		{
-			this.pathBuilder = pathBuilder;
+			this.pathFactory = pathFactory;
 			this.pathFunc = pathFunc;
 			this.options = options;
 		}
 
+		private ITypedRoutingEndpoint<TRouteValues> endpoint;
 		ITypedRoutingEndpoint<TRouteValues> ITypedRouteBuilder<TRouteValues>.Endpoint
 		{
 			get => this.endpoint;
@@ -45,83 +45,66 @@ namespace Jmg.AspNetCore.TypedRouting
 			}
 		}
 
-		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.AddLiteral<TChildRouteValues>(String literal, Func<TRouteValues, TChildRouteValues> func, Func<TChildRouteValues, TRouteValues> reverseFunc, TypedRouteOptions options)
-		{
-			AssertNewSegment(literal);
-
-			Func<TChildRouteValues, PathString> childPathFunc;
-			if (this.pathFunc != null)
-			{
-				childPathFunc = (cv) => pathFunc(reverseFunc(cv)) + new PathString("/" + literal);
-			}
-			else
-			{
-				childPathFunc = (cv) => new PathString("/" + literal);
-			}
-
-			if (!options.HasFlag(TypedRouteOptions.IntermediateRoute))
-			{
-				this.pathBuilder.AddPath(childPathFunc);
-			}
-
-			var nextRouteHandler = new InternalBuilder<TRootRouteValues, TChildRouteValues>(this.pathBuilder, childPathFunc, options);
-			this.pathEntries[literal] = new LiteralContainer<TChildRouteValues>(literal, func, nextRouteHandler);
-			return nextRouteHandler;
-		}
-
-		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.AddInt32<TChildRouteValues>(Func<TRouteValues, Int32, TChildRouteValues> func, Func<TChildRouteValues, TRouteValues> reverseFunc, Func<TChildRouteValues, Int32> split, TypedRouteOptions options)
+		private ITypedRouteBuilder<TChildRouteValues> CreateChildBuilder<TChildRouteValues>(
+			Func<TChildRouteValues, TRouteValues> getParentRouteValues, 
+			Func<TChildRouteValues, String> suffixFunc,
+			TypedRouteOptions options)
 		{
 			Func<TChildRouteValues, PathString> childPathFunc;
 			if (this.pathFunc != null)
 			{
-				childPathFunc = (cv) => pathFunc(reverseFunc(cv)) + new PathString("/" + split(cv));
+				childPathFunc = (cv) => pathFunc(getParentRouteValues(cv)) + new PathString("/" + suffixFunc(cv));
 			}
 			else
 			{
-				childPathFunc = (cv) => new PathString("/" + split(cv));
+				childPathFunc = (cv) => new PathString("/" + suffixFunc(cv));
 			}
 
 			if (!options.HasFlag(TypedRouteOptions.IntermediateRoute))
 			{
-				this.pathBuilder.AddPath(childPathFunc);
+				this.pathFactory.AddPath(childPathFunc);
 			}
 
-			var nextRouteHandler = new InternalBuilder<TRootRouteValues, TChildRouteValues>(this.pathBuilder, childPathFunc, options);
-			this.numberContainer = new NumberContainer<TChildRouteValues>(func, nextRouteHandler);
-			return nextRouteHandler;
+			return new InternalBuilder<TRootRouteValues, TChildRouteValues>(this.pathFactory, childPathFunc, options);
 		}
 
-		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.AddGuid<TChildRouteValues>(Func<TRouteValues, Guid, TChildRouteValues> func, Func<TChildRouteValues, TRouteValues> reverseFunc, Func<TChildRouteValues, Guid> split, TypedRouteOptions options)
+		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.AddLiteral<TChildRouteValues>(
+			String literal,
+			Func<TRouteValues, TChildRouteValues> getChildRouteValues,
+			Func<TChildRouteValues, TRouteValues> getParentRouteValues,
+			TypedRouteOptions options)
 		{
-			Func<TChildRouteValues, PathString> childPathFunc;
-			if (this.pathFunc != null)
+			if (this.pathEntries.ContainsKey(literal))
 			{
-				childPathFunc = (cv) => pathFunc(reverseFunc(cv)) + new PathString("/" + split(cv));
-			}
-			else
-			{
-				childPathFunc = (cv) => new PathString("/" + split(cv));
+				throw new InvalidOperationException($"A child route has already been created for this literal: {literal}");
 			}
 
-			if (!options.HasFlag(TypedRouteOptions.IntermediateRoute))
-			{
-				this.pathBuilder.AddPath(childPathFunc);
-			}
-
-			var nextRouteHandler = new InternalBuilder<TRootRouteValues, TChildRouteValues>(this.pathBuilder, childPathFunc, options);
-			this.guidContainer = new GuidContainer<TChildRouteValues>(func, nextRouteHandler);
-			return nextRouteHandler;
+			var child = CreateChildBuilder(getParentRouteValues, cv => literal, options);
+			this.pathEntries[literal] = new LiteralContainer<TChildRouteValues>(literal, getChildRouteValues, child);
+			return child;
 		}
 
-		private void AssertNewSegment(String segment)
+		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.AddInt32<TChildRouteValues>(
+			Func<TRouteValues, Int32, TChildRouteValues> getChildRouteValues,
+			Func<TChildRouteValues, TRouteValues> getParentRouteValues,
+			Func<TChildRouteValues, Int32> getLastValue,
+			TypedRouteOptions options)
 		{
-			if (IsSegmentReserved(segment))
-			{
-				throw new InvalidOperationException($"Segment has already been reserved: {segment}");
-			}
+			var child = CreateChildBuilder(getParentRouteValues, cv => getLastValue(cv).ToString(), options);
+			this.numberContainer = new NumberContainer<TChildRouteValues>(getChildRouteValues, child);
+			return child;
 		}
 
-		private Boolean IsSegmentReserved(String segment) => this.pathEntries.ContainsKey(segment);
+		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.AddGuid<TChildRouteValues>(
+			Func<TRouteValues, Guid, TChildRouteValues> getChildRouteValues,
+			Func<TChildRouteValues, TRouteValues> getParentRouteValues,
+			Func<TChildRouteValues, Guid> getLastValue,
+			TypedRouteOptions options)
+		{
+			var child = CreateChildBuilder(getParentRouteValues, cv => getLastValue(cv).ToString(), options);
+			this.guidContainer = new GuidContainer<TChildRouteValues>(getChildRouteValues, child);
+			return child;
+		}
 
 		ITypedRouteHandler<TRouteValues> ITypedRouteBuilder<TRouteValues>.Build()
 		{
@@ -137,22 +120,22 @@ namespace Jmg.AspNetCore.TypedRouting
 				}
 				else
 				{
-					IEnumerable<RouteHandlers.IMultiLiteralContainer<TRouteValues>> items = this.pathEntries.Select(i => i.Value.BuildMulti(i.Key));
+					var items = this.pathEntries.Select(i => i.Value.BuildMulti(i.Key));
 					return new RouteHandlers.MultiLiteral<TRouteValues>(this.endpoint, items);
 				}
 			}
-
-			if (this.numberContainer != null)
+			else if (this.numberContainer != null)
 			{
 				return this.numberContainer.Build(this.endpoint);
 			}
-
-			if (this.guidContainer != null)
+			else if (this.guidContainer != null)
 			{
 				return this.guidContainer.Build(this.endpoint);
 			}
-
-			return new RouteHandlers.Leaf<TRouteValues>(this.endpoint);
+			else
+			{
+				return new RouteHandlers.Leaf<TRouteValues>(this.endpoint);
+			}
 		}
 	}
 }

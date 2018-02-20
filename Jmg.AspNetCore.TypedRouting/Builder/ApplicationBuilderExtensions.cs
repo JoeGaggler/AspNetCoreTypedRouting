@@ -7,31 +7,24 @@ using System.Text;
 namespace Jmg.AspNetCore.TypedRouting.Builder
 {
 	/// <summary>
-	/// Extensions to inserts Typed Routing into the pipeline
+	/// Extensions to inserting Typed Routing into the pipeline
 	/// </summary>
-    public static class ApplicationBuilderExtensions
-    {
-		public static IServiceCollection AddTypedRouting<TRootRouteValues, TFac>(this IServiceCollection services) where TFac : class, ITypedRouteFactory<TRootRouteValues>
-		{
-			services.AddSingleton<ITypedRoutePathFactory<TRootRouteValues>>(new TypedRoutePathFactory<TRootRouteValues>());
-			services.AddSingleton<ITypedRouteFactory<TRootRouteValues>, TFac>();
-			return services.AddSingleton<TypedRoutingMiddleware<RootRouteValues>>();
-		}
+	public static class ApplicationBuilderExtensions
+	{
+		/// <summary>
+		/// Adds Typed Routing middleware to the pipeline
+		/// </summary>
+		/// <typeparam name="TRootRouteValues">Type that represents the root route values</typeparam>
+		/// <param name="app">Application builder to extend</param>
+		/// <returns>Application with the Typed Routing middleware</returns>
+		public static IApplicationBuilder UseTypedRouting<TRootRouteValues>(this IApplicationBuilder app) => 
+			app.UseMiddleware<TypedRoutingMiddleware<TRootRouteValues>>();
 
-		public static IServiceCollection AddTypedRouting<TRootRouteValues>(this IServiceCollection services)
-		{
-			services.AddSingleton<ITypedRoutePathFactory<TRootRouteValues>>(new TypedRoutePathFactory<TRootRouteValues>());
-			return services.AddSingleton<TypedRoutingMiddleware<RootRouteValues>>();
-		}
-
-		public static IServiceCollection AddTypedRouting(this IServiceCollection services) => AddTypedRouting<RootRouteValues>(services);
-
-
-		public static IApplicationBuilder UseTypedRouting<TRootRouteValues>(this IApplicationBuilder app)
-		{
-			return app.UseMiddleware<TypedRoutingMiddleware<TRootRouteValues>>();
-		}
-
+		/// <summary>
+		/// Adds Typed Routing middleware to the pipeline
+		/// </summary>
+		/// <param name="app">Application builder to extend</param>
+		/// <returns>Application with the Typed Routing middleware</returns>
 		public static IApplicationBuilder UseTypedRouting(this IApplicationBuilder app) => UseTypedRouting<RootRouteValues>(app);
 	}
 }

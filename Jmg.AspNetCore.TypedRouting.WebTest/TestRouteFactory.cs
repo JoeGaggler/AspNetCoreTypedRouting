@@ -6,15 +6,17 @@ using Jmg.AspNetCore.TypedRouting.Extensions;
 
 namespace Jmg.AspNetCore.TypedRouting.WebTest
 {
-    public class TestRouteFactory : ITypedRouteFactory<RootRouteValues>
+    internal class TestRouteFactory : ITypedRouteFactory<RootRouteValues>
     {
 		private readonly ITypedRoutePathFactory<RootRouteValues> pathFactory;
+		private readonly TestUrlFactory urlFactory;
 
 		RootRouteValues ITypedRouteFactory<RootRouteValues>.RootRouteValues => RootRouteValues.Instance;
 
-		public TestRouteFactory(ITypedRoutePathFactory<RootRouteValues> pathFactory)
+		public TestRouteFactory(ITypedRoutePathFactory<RootRouteValues> pathFactory, TestUrlFactory urlFactory)
 		{
 			this.pathFactory = pathFactory;
+			this.urlFactory = urlFactory;
 		}
 
 		void ITypedRouteFactory<RootRouteValues>.Configure(ITypedRouteBuilder<RootRouteValues> root)
@@ -24,8 +26,7 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
 			var clientUserTaskRoute = clientUserRoute.AddNamedGuid("Task", (user, taskId) => new ClientUserTaskRouteValues(user.ClientId, user.UserId, taskId), (c) => new ClientUserRouteValues(c.ClientId, c.UserId), (c) => c.TaskId);
 			var clientUserSettingsRoute = clientUserRoute.AddLiteral("Settings", (user) => new ClientUserSettingsRouteValues(user.ClientId, user.UserId), (c) => new ClientUserRouteValues(c.ClientId, c.UserId));
 			
-			// TODO: Get links to work again
-			clientRoute.Endpoint = new StringEndpoint<ClientRouteValues>(c => $"Client: {c.ClientId} - {pathFactory.GetPath(c)}");
+			clientRoute.Endpoint = new StringEndpoint<ClientRouteValues>(c => $"Client: {c.ClientId} - {urlFactory.Client(c)}");
 			clientUserRoute.Endpoint = new StringEndpoint<ClientUserRouteValues>(c => $"Client User: {c.ClientId} {c.UserId} - {pathFactory.GetPath(c)}");
 			clientUserTaskRoute.Endpoint = new StringEndpoint<ClientUserTaskRouteValues>(c => $"Client User Task: {c.ClientId} {c.UserId} {c.TaskId} - {pathFactory.GetPath(c)}");
 			clientUserSettingsRoute.Endpoint = new StringEndpoint<ClientUserSettingsRouteValues>(c => $"Client User Settings: {c.ClientId} {c.UserId} - {pathFactory.GetPath(c)}");
