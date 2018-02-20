@@ -17,12 +17,12 @@ namespace Jmg.AspNetCore.TypedRouting
 		/// Constructs the middleware
 		/// </summary>
 		/// <param name="config">Injected dependency for route configuration</param>
-		public TypedRoutingMiddleware(ITypedRouteFactory<TRootRouteValues> config)
+		public TypedRoutingMiddleware(ITypedRouteFactory<TRootRouteValues> config, ITypedRoutePathFactory<TRootRouteValues> pathFactory)
 		{
-			TypedRoutePathFactory pathBuilder = new TypedRoutePathFactory();
-			ITypedRouteBuilder<TRootRouteValues> builder = new InternalBuilder<TRootRouteValues>(pathBuilder, null, TypedRouteOptions.None);
+			var pathBuilder = (TypedRoutePathFactory<TRootRouteValues>)pathFactory;
+			ITypedRouteBuilder<TRootRouteValues> builder = new InternalBuilder<TRootRouteValues, TRootRouteValues>(pathBuilder, null, TypedRouteOptions.None);
 
-			config.Configure(builder, pathBuilder);
+			config.Configure(builder);
 
 			var handler = builder.Build();			
 

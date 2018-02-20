@@ -11,9 +11,9 @@ namespace Jmg.AspNetCore.TypedRouting
 	/// Builds and handles routes
 	/// </summary>
 	/// <typeparam name="TRouteValues">Route values that represent the current path</typeparam>
-	internal partial class InternalBuilder<TRouteValues> : ITypedRouteBuilder<TRouteValues>
+	internal partial class InternalBuilder<TRootRouteValues, TRouteValues> : ITypedRouteBuilder<TRouteValues>
 	{
-		private readonly TypedRoutePathFactory pathBuilder;
+		private readonly TypedRoutePathFactory<TRootRouteValues> pathBuilder;
 		private readonly Func<TRouteValues, PathString> pathFunc;
 		private readonly TypedRouteOptions options;
 
@@ -24,7 +24,7 @@ namespace Jmg.AspNetCore.TypedRouting
 
 		private ITypedRoutingEndpoint<TRouteValues> endpoint;
 
-		public InternalBuilder(TypedRoutePathFactory pathBuilder, Func<TRouteValues, PathString> pathFunc, TypedRouteOptions options)
+		public InternalBuilder(TypedRoutePathFactory<TRootRouteValues> pathBuilder, Func<TRouteValues, PathString> pathFunc, TypedRouteOptions options)
 		{
 			this.pathBuilder = pathBuilder;
 			this.pathFunc = pathFunc;
@@ -64,7 +64,7 @@ namespace Jmg.AspNetCore.TypedRouting
 				this.pathBuilder.AddPath(childPathFunc);
 			}
 
-			var nextRouteHandler = new InternalBuilder<TChildRouteValues>(this.pathBuilder, childPathFunc, options);
+			var nextRouteHandler = new InternalBuilder<TRootRouteValues, TChildRouteValues>(this.pathBuilder, childPathFunc, options);
 			this.pathEntries[literal] = new LiteralContainer<TChildRouteValues>(literal, func, nextRouteHandler);
 			return nextRouteHandler;
 		}
@@ -86,7 +86,7 @@ namespace Jmg.AspNetCore.TypedRouting
 				this.pathBuilder.AddPath(childPathFunc);
 			}
 
-			var nextRouteHandler = new InternalBuilder<TChildRouteValues>(this.pathBuilder, childPathFunc, options);
+			var nextRouteHandler = new InternalBuilder<TRootRouteValues, TChildRouteValues>(this.pathBuilder, childPathFunc, options);
 			this.numberContainer = new NumberContainer<TChildRouteValues>(func, nextRouteHandler);
 			return nextRouteHandler;
 		}
@@ -108,7 +108,7 @@ namespace Jmg.AspNetCore.TypedRouting
 				this.pathBuilder.AddPath(childPathFunc);
 			}
 
-			var nextRouteHandler = new InternalBuilder<TChildRouteValues>(this.pathBuilder, childPathFunc, options);
+			var nextRouteHandler = new InternalBuilder<TRootRouteValues, TChildRouteValues>(this.pathBuilder, childPathFunc, options);
 			this.guidContainer = new GuidContainer<TChildRouteValues>(func, nextRouteHandler);
 			return nextRouteHandler;
 		}

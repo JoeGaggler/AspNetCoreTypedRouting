@@ -5,16 +5,18 @@ using System.Text;
 
 namespace Jmg.AspNetCore.TypedRouting
 {
-    public interface ITypedRoutePathFactory
+    public interface ITypedRoutePathFactory<TRootRouteValues>
     {
 		PathString GetPath<TRouteValues>(TRouteValues routeValues);
     }
 
-	internal class TypedRoutePathFactory : ITypedRoutePathFactory
+	internal class TypedRoutePathFactory<TRootRouteValues> : ITypedRoutePathFactory<TRootRouteValues>
 	{
 		private Dictionary<Type, Object> pathFuncMap = new Dictionary<Type, Object>(); // Object is Func<TRouteValues, PathString>
 
-		PathString ITypedRoutePathFactory.GetPath<TRouteValues>(TRouteValues routeValues)
+		public TypedRoutePathFactory() { }
+
+		PathString ITypedRoutePathFactory<TRootRouteValues>.GetPath<TRouteValues>(TRouteValues routeValues)
 		{
 			if (!this.pathFuncMap.TryGetValue(typeof(TRouteValues), out var func) || !(func is Func<TRouteValues, PathString> pathFunc))
 			{

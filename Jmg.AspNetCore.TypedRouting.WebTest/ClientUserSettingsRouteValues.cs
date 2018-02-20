@@ -5,17 +5,15 @@ using System.Threading.Tasks;
 
 namespace Jmg.AspNetCore.TypedRouting.WebTest
 {
-	internal class ClientUserTaskRouteValues
+	internal class ClientUserSettingsRouteValues
 	{
 		public readonly Int32 ClientId;
 		public readonly Int32 UserId;
-		public readonly Guid TaskId;
 
-		public ClientUserTaskRouteValues(Int32 clientId, Int32 userId, Guid taskId)
+		public ClientUserSettingsRouteValues(Int32 clientId, Int32 userId)
 		{
 			this.ClientId = clientId;
 			this.UserId = userId;
-			this.TaskId = taskId;
 		}
 	}
 }

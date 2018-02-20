@@ -12,10 +12,10 @@ namespace Jmg.AspNetCore.TypedRouting
 		//public InternalRouter<RootRouteValues> RootRoute { get; private set; }
 
 		private readonly ITypedRouteHandler<TRootRouteValues> rootRouteHandler;
-		private readonly ITypedRoutePathFactory pathFactory;
+		private readonly ITypedRoutePathFactory<TRootRouteValues> pathFactory;
 		private readonly TRootRouteValues rootRouteValues;
 
-		public TypedRouter(ITypedRouteHandler<TRootRouteValues> handler, ITypedRoutePathFactory pathFactory, TRootRouteValues rootRouteValues)
+		public TypedRouter(ITypedRouteHandler<TRootRouteValues> handler, ITypedRoutePathFactory<TRootRouteValues> pathFactory, TRootRouteValues rootRouteValues)
 		{
 			this.rootRouteHandler = handler;
 			this.pathFactory = pathFactory;

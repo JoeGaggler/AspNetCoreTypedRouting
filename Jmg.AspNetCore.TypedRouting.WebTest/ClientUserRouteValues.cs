@@ -13,11 +13,5 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
 			this.ClientId = clientId;
 			this.UserId = userId;
 		}
-
-		public ClientUserRouteValues(ClientRouteValues client, Int32 userId)
-		{
-			this.ClientId = client.ClientId;
-			this.UserId = userId;
-		}
 	}
 }

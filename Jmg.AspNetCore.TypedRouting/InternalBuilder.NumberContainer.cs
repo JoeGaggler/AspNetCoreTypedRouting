@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Jmg.AspNetCore.TypedRouting
 {
-	partial class InternalBuilder<TRouteValues>
+	partial class InternalBuilder<TRootRouteValues, TRouteValues>
 	{
 		private interface INumberContainer
 		{
