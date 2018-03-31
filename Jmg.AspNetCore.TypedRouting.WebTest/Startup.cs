@@ -16,7 +16,7 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
 		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddTypedRouting<RootRouteValues, TestRouteFactory>();
+			services.AddTypedRouting<RootRouteValues, TestConfig>();
 			services.AddSingleton<TestUrlFactory>();
 		}
 
@@ -32,7 +32,7 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
 
 			app.Run(async (context) =>
 			{
-				await context.Response.WriteAsync("Invalid route");
+				await context.Response.WriteAsync($"Typed Routing did not handle the requested path: {context.Request.Path}");
 			});
 		}
 	}

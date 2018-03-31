@@ -19,26 +19,4 @@ namespace Jmg.AspNetCore.TypedRouting
 		/// <returns>Path mapped from route values</returns>
 		PathString GetPath<TRouteValues>(TRouteValues routeValues);
     }
-
-	internal class TypedRoutePathFactory<TRootRouteValues> : ITypedRoutePathFactory<TRootRouteValues>
-	{
-		private Dictionary<Type, Object> pathFuncMap = new Dictionary<Type, Object>(); // Object is Func<TRouteValues, PathString>
-
-		public TypedRoutePathFactory() { }
-
-		PathString ITypedRoutePathFactory<TRootRouteValues>.GetPath<TRouteValues>(TRouteValues routeValues)
-		{
-			if (!this.pathFuncMap.TryGetValue(typeof(TRouteValues), out var func) || !(func is Func<TRouteValues, PathString> pathFunc))
-			{
-				throw new InvalidOperationException("Route does not exist");
-			}
-
-			return pathFunc(routeValues);
-		}
-
-		public void AddPath<TRouteValues>(Func<TRouteValues, PathString> mapping)
-		{
-			this.pathFuncMap[typeof(TRouteValues)] = mapping;
-		}
-	}
 }

@@ -5,16 +5,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jmg.AspNetCore.TypedRouting
+namespace Jmg.AspNetCore.TypedRouting.Internal
 {
+	/// <summary>
+	/// Factory for <see cref="RouteBuilder{TRootRouteValues, TRouteValues}"/>
+	/// </summary>
+	public static class RouteBuilder
+	{
+		/// <summary>
+		/// Creates a <see cref="RouteBuilder{TRootRouteValues, TRouteValues}"/>
+		/// </summary>
+		/// <typeparam name="TRootRouteValues">Root route values</typeparam>
+		/// <param name="pathFactory">Path factory</param>
+		/// <returns>New typed route builder</returns>
+		public static RouteBuilder<TRootRouteValues, TRootRouteValues> Create<TRootRouteValues>(ITypedRoutePathFactory<TRootRouteValues> pathFactory)
+		{
+			return new RouteBuilder<TRootRouteValues, TRootRouteValues>(pathFactory, null, TypedRouteOptions.None);
+		}
+	}
+
 	/// <summary>
 	/// Internal implementation of the route builder
 	/// </summary>
 	/// <typeparam name="TRootRouteValues">Root route values from the current Typed Routing middleware</typeparam>
 	/// <typeparam name="TRouteValues">Route values that represent the current path</typeparam>
-	internal partial class InternalBuilder<TRootRouteValues, TRouteValues> : ITypedRouteBuilder<TRouteValues>
+	public partial class RouteBuilder<TRootRouteValues, TRouteValues> : ITypedRouteBuilder<TRouteValues>
 	{
-		private readonly TypedRoutePathFactory<TRootRouteValues> pathFactory;
+		private readonly PathFactory<TRootRouteValues> pathFactory;
 		private readonly Func<TRouteValues, PathString> pathFunc;
 		private readonly TypedRouteOptions options;
 
@@ -23,9 +40,9 @@ namespace Jmg.AspNetCore.TypedRouting
 		private IGuidContainer guidContainer;
 		private INumberContainer numberContainer;
 
-		public InternalBuilder(TypedRoutePathFactory<TRootRouteValues> pathFactory, Func<TRouteValues, PathString> pathFunc, TypedRouteOptions options)
+		internal RouteBuilder(ITypedRoutePathFactory<TRootRouteValues> pathFactory, Func<TRouteValues, PathString> pathFunc, TypedRouteOptions options)
 		{
-			this.pathFactory = pathFactory;
+			this.pathFactory = (PathFactory<TRootRouteValues>)pathFactory;
 			this.pathFunc = pathFunc;
 			this.options = options;
 		}
@@ -46,7 +63,7 @@ namespace Jmg.AspNetCore.TypedRouting
 		}
 
 		private ITypedRouteBuilder<TChildRouteValues> CreateChildBuilder<TChildRouteValues>(
-			Func<TChildRouteValues, TRouteValues> getParentRouteValues, 
+			Func<TChildRouteValues, TRouteValues> getParentRouteValues,
 			Func<TChildRouteValues, String> suffixFunc,
 			TypedRouteOptions options)
 		{
@@ -65,7 +82,7 @@ namespace Jmg.AspNetCore.TypedRouting
 				this.pathFactory.AddPath(childPathFunc);
 			}
 
-			return new InternalBuilder<TRootRouteValues, TChildRouteValues>(this.pathFactory, childPathFunc, options);
+			return new RouteBuilder<TRootRouteValues, TChildRouteValues>(this.pathFactory, childPathFunc, options);
 		}
 
 		ITypedRouteBuilder<TChildRouteValues> ITypedRouteBuilder<TRouteValues>.AddLiteral<TChildRouteValues>(

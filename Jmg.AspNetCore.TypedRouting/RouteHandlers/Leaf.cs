@@ -25,7 +25,7 @@ namespace Jmg.AspNetCore.TypedRouting.RouteHandlers
 				}
 				else
 				{
-					await this.endpoint.Run(httpContext, routeValues);
+					await this.endpoint.RunAsync(httpContext, routeValues);
 					return true;
 				}
 			}

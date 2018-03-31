@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jmg.AspNetCore.TypedRouting
+namespace Jmg.AspNetCore.TypedRouting.Extensions
 {
 	internal static class PathStringExtensions
 	{

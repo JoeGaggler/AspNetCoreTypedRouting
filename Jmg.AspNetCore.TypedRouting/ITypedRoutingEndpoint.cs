@@ -18,6 +18,6 @@ namespace Jmg.AspNetCore.TypedRouting
 		/// <param name="httpContext">Current HTTP context</param>
 		/// <param name="routeValues">Route values for the current request</param>
 		/// <returns>Task that completes when the endpoint has returned an HTTP response</returns>
-		Task Run(HttpContext httpContext, TRouteValues routeValues);
+		Task RunAsync(HttpContext httpContext, TRouteValues routeValues);
     }
 }

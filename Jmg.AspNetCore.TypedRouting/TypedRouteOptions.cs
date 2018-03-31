@@ -8,6 +8,7 @@ namespace Jmg.AspNetCore.TypedRouting
 	/// <summary>
 	/// Options that apply to Typed Routes
 	/// </summary>
+	[Flags]
 	public enum TypedRouteOptions
 	{
 		/// <summary>

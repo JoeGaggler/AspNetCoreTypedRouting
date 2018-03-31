@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jmg.AspNetCore.TypedRouting
+namespace Jmg.AspNetCore.TypedRouting.Internal
 {
-	partial class InternalBuilder<TRootRouteValues, TRouteValues>
+	partial class RouteBuilder<TRootRouteValues, TRouteValues>
 	{
 		private interface ILiteralContainer
 		{

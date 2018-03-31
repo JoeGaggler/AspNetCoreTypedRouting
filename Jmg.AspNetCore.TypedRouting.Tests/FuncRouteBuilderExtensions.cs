@@ -8,14 +8,14 @@ namespace Jmg.AspNetCore.TypedRouting.Tests
 {
     public static class FuncRouteBuilderExtensions
     {
-		public static void AttachFunc<TRouteValues>(this ITypedRouteBuilder<TRouteValues> builder, Func<TRouteValues, Task> func)
+		public static void AttachAsyncFunc<TRouteValues>(this ITypedRouteBuilder<TRouteValues> builder, Func<TRouteValues, Task> func)
 		{
 			builder.Endpoint = new Endpoint<TRouteValues>(func);
 		}
 
 		public static void AttachAction<TRouteValues>(this ITypedRouteBuilder<TRouteValues> builder, Action<TRouteValues> action)
 		{
-			builder.AttachFunc((rv) => { action(rv); return Task.CompletedTask; });
+			builder.AttachAsyncFunc((rv) => { action(rv); return Task.CompletedTask; });
 		}
 
 		private class Endpoint<TRouteValues> : ITypedRoutingEndpoint<TRouteValues>
@@ -27,7 +27,7 @@ namespace Jmg.AspNetCore.TypedRouting.Tests
 				this.func = func;
 			}
 
-			public Task Run(HttpContext httpContext, TRouteValues routeValues) => this.func(routeValues);
+			public Task RunAsync(HttpContext httpContext, TRouteValues routeValues) => this.func(routeValues);
 		}
 	}
 }

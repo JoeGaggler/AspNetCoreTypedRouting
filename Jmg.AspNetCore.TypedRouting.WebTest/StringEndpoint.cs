@@ -17,7 +17,7 @@ namespace Jmg.AspNetCore.TypedRouting.WebTest
 			this.func = func;
 		}
 
-		public async Task Run(HttpContext httpContext, TRouteValues routeValues)
+		public async Task RunAsync(HttpContext httpContext, TRouteValues routeValues)
 		{
 			var response = httpContext.Response;
 			var body = response.Body;

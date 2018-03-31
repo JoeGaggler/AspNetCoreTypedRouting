@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Jmg.AspNetCore.TypedRouting.Extensions;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +56,7 @@ namespace Jmg.AspNetCore.TypedRouting.RouteHandlers
 				}
 				else
 				{
-					await this.endpoint.Run(httpContext, routeValues);
+					await this.endpoint.RunAsync(httpContext, routeValues);
 					return true;
 				}
 			}
